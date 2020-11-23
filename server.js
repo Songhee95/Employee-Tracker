@@ -11,9 +11,17 @@ var connection = mysql.createConnection({
     password: "dmwm9191@A",
     database: "employee_data"
   });
+var roles=[];
 
 connection.connect(function(err){
     if(err) throw err;
+    connection.query("SELECT title FROM role", function(err,res){
+        if(err) throw err;
+        res.map(role => {
+            roles.push(role.title);
+        })
+    })
+
     inquirer.prompt(start)
     .then(res => {
         let answer = res.start;
@@ -84,16 +92,7 @@ var addEmployee = function(){
             name: "role",
             type: "list",
             message: "What it the employee's role?",
-            choices: [
-                "Sales Lead",
-                "Salesperson",
-                "Lead Engineer",
-                "Software Engineer",
-                "Account Manager",
-                "Accountant",
-                "Legal Team Lead",
-                "Lawyer"
-            ]
+            choices: roles
         },
         {
             name: "manager",
