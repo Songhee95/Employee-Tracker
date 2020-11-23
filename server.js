@@ -128,19 +128,36 @@ var addEmployee = function(){
     .then(function(res){
         var first = "'"+res.first_name+"'";
         var last = "'"+res.last_name+"'";
-        var role =function(){
-            if(res.role === "Sales Lead" || "Salesperson"){
-                return 1;
-            }else if(res.role === "Lead Engineer"||"Software Engineer"){
-                return 2;
-            }else if(res.role === "Account Manager" || "Accountant"){
-                return 3;
-            }else if(res.role === "Legal Team Lead" || "Lawyer"){
-                return 4;
-            }
+        var roleId = 0;
+        switch(res.role){
+            case ("Sales Lead"):
+                roleId =1;
+            break;
+            case("SalesPerson"):
+                roleId = 2;
+            break;
+            case("Lead Engineer"):
+                roleId = 3;
+            break;
+            case("Software Engneer"):
+                roleId = 4;
+            break;
+            case("Account Manager"):
+                roleId = 5;
+            break;
+            case("Accountant"):
+                roleId = 6;
+            break;
+            case("Legal Team Lead"):
+                roleId = 7;
+            break;
+            case("Lawyer"):
+                roleId = 8;
+            break;
         }
+        console.log(roleId);
         var manager = res.manager;
-        var insEmployee = new ViewAll(["first_name, last_name, role_id, manager_id"], [first, last, role(), manager]).insertEmployee();
+        var insEmployee = new ViewAll(["first_name, last_name, role_id, manager_id"], [first, last, roleId, manager]).insertEmployee();
         connection.query(insEmployee, function(err, res){
             if (err) throw err;
             console.table(res);
