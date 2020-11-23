@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const ViewAll = require("./queries.js");
 var viewAll = new ViewAll(["employee.first_name, employee.last_name, role.title, department_list.department, role.salary, employee.manager_id"]
-, ["department_list, role, employee"], ["role.id = employee.role_id AND department_list.id = role.department_id"]);
+, ["department_list, role, employee"], ["role.id = employee.role_id AND department_list.id = role.department_id"]).viewAll();
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -15,65 +15,91 @@ var connection = mysql.createConnection({
     database: "employee_data"
   });
 var roles=[];
+var depart = [];
 
 connection.connect(function(err){
     if(err) throw err;
-    connection.query("SELECT title FROM role", function(err,res){
+    connection.query(viewAll, function(err,res){
         if(err) throw err;
         res.map(role => {
             roles.push(role.title);
-        })
-    })
-    startDisplay();
-    function startDisplay(){
-        inquirer.prompt(start)
-        .then(res => {
-            let answer = res.start;
-            switch(answer){
-                case("View All Employees"):
-                    var query = viewAll.viewAll();
-                    connection.query(query, function(err,res){
-                        console.table(res);
-                        startDisplay();
-                    })
-                break;
-                case("View All Employees By Department"):
-
-                break;
-                case("View All Employees By Manager"):
-
-                break;
-                case("Add Employee"):
-                    addEmployee();
-                break;
-                case("Remove Employee"):
-
-                break;
-                case("Update Employee Role"):
-
-                break;
-                case("Update Employee Manager"):
-
-                break;
-                case("View All Roles"):
-
-                break;
-                case("Add Role"):
-
-                break;
-                case("Remove Role"):
-
-                break;
-                case("View All Departments"):
-
-                break;
-                case("Add Department"):
-
-                break;
+            if(depart.indexOf(role.department) == -1){
+                depart.push(role.department);
             }
         })
-    }
+        startDisplay();
+    })
 });
+function startDisplay(){
+    inquirer
+    .prompt(start)
+    .then(res => {
+        let answer = res.start;
+        switch(answer){
+            case("View All Employees"):
+                connection.query(viewAll, function(err,res){
+                    console.table(res);
+                    startDisplay();
+                })
+            break;
+            case("View All Employees By Department"):
+                employeeByDepartment();
+            break;
+            case("View All Employees By Manager"):
+
+            break;
+            case("Add Employee"):
+                addEmployee();
+            break;
+            case("Remove Employee"):
+
+            break;
+            case("Update Employee Role"):
+
+            break;
+            case("Update Employee Manager"):
+
+            break;
+            case("View All Roles"):
+
+            break;
+            case("Add Role"):
+
+            break;
+            case("Remove Role"):
+
+            break;
+            case("View All Departments"):
+
+            break;
+            case("Add Department"):
+
+            break;
+        }
+    })
+}
+var employeeByDepartment = function(){
+    var question = [
+        {
+            name: 'department',
+            type: 'list',
+            message: 'Which department would you like to see employees for? ',
+            choices: depart,
+        }
+    ]
+    inquirer.prompt(question)
+    .then(function(res){
+        var department = "'" + res.department +"'";
+        var byDepartment = new ViewAll(["employee.first_name, employee.last_name, role.title"]
+        , ["department_list, role, employee"], 
+        ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).viewAll();
+        connection.query(byDepartment, function(err, res){
+            if(err) throw err;
+            console.table(res);
+            startDisplay();
+        })
+    })
+}
 var addEmployee = function(){
     var question = [
         {
@@ -122,7 +148,6 @@ var addEmployee = function(){
         })
     })
 }
-
 app.listen(PORT, function(){
     console.log("app is listening on port :" + PORT);
 })
