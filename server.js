@@ -3,6 +3,9 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const app = express();
 const PORT = process.env.PORT || 8080;
+const ViewAll = require("./queries.js");
+var viewAll = new ViewAll(["employee.first_name, employee.last_name, role.title, department_list.department, role.salary, employee.manager_id"]
+, ["department_list, role, employee"], ["role.id = employee.role_id AND department_list.id = role.department_id"]);
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -21,61 +24,56 @@ connection.connect(function(err){
             roles.push(role.title);
         })
     })
+    startDisplay();
+    function startDisplay(){
+        inquirer.prompt(start)
+        .then(res => {
+            let answer = res.start;
+            switch(answer){
+                case("View All Employees"):
+                    var query = viewAll.viewAll();
+                    connection.query(query, function(err,res){
+                        console.table(res);
+                        startDisplay();
+                    })
+                break;
+                case("View All Employees By Department"):
 
-    inquirer.prompt(start)
-    .then(res => {
-        let answer = res.start;
-        switch(answer){
-            case("View All Employees"):
-                viewAll();
-            break;
-            case("View All Employees By Department"):
+                break;
+                case("View All Employees By Manager"):
 
-            break;
-            case("View All Employees By Manager"):
+                break;
+                case("Add Employee"):
+                    addEmployee();
+                break;
+                case("Remove Employee"):
 
-            break;
-            case("Add Employee"):
-                addEmployee();
-            break;
-            case("Remove Employee"):
+                break;
+                case("Update Employee Role"):
 
-            break;
-            case("Update Employee Role"):
+                break;
+                case("Update Employee Manager"):
 
-            break;
-            case("Update Employee Manager"):
+                break;
+                case("View All Roles"):
 
-            break;
-            case("View All Roles"):
+                break;
+                case("Add Role"):
 
-            break;
-            case("Add Role"):
+                break;
+                case("Remove Role"):
 
-            break;
-            case("Remove Role"):
+                break;
+                case("View All Departments"):
 
-            break;
-            case("View All Departments"):
+                break;
+                case("Add Department"):
 
-            break;
-            case("Add Department"):
-
-            break;
-        }
-    })
-})
-
-var viewAll = function(){
-    var query = "SELECT employee.id, employee.first_name, employee.last_name, role.title, department_list.department, role.salary, employee.manager_id ";
-    query+= "FROM employee, role, department_list ";
-    query+= 'WHERE role.id = employee.role_id AND department_list.id = role.department_id ';
-    
-    connection.query(query, function(err, res){
-        if(err) throw err;
-        console.table(res);
-    })
-};
+                break;
+            }
+        })
+    }
+});
 var addEmployee = function(){
     var question = [
         {
@@ -102,8 +100,8 @@ var addEmployee = function(){
     ];
     inquirer.prompt(question)
     .then(function(res){
-        var first = res.first_name;
-        var last = res.last_name;
+        var first = "'"+res.first_name+"'";
+        var last = "'"+res.last_name+"'";
         var role =function(){
             if(res.role === "Sales Lead" || "Salesperson"){
                 return 1;
@@ -116,10 +114,11 @@ var addEmployee = function(){
             }
         }
         var manager = res.manager;
-        connection.query("INSERT INTO employee (first_name, last_name, role_id) VALUES (?,?,?)", 
-        [first, last, role(), manager], function(err, res){
+        var insEmployee = new ViewAll(["first_name, last_name, role_id, manager_id"], [first, last, role(), manager]).insertEmployee();
+        connection.query(insEmployee, function(err, res){
             if (err) throw err;
             console.table(res);
+            startDisplay();
         })
     })
 }
