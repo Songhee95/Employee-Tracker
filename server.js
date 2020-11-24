@@ -45,9 +45,9 @@ function getData(){
             }
         })
 })};
-async function startDisplay(){
+function startDisplay(){
     getData();
-    await inquirer
+    inquirer
     .prompt(start)
     .then(res => {
         let answer = res.start;
@@ -130,12 +130,11 @@ var employeeByManager = function(){
 }
 var addEmployee = function(){
     var addEmployeeQ = new promptQ;
-    console.log(roles)
     var question = addEmployeeQ.addEmpQuestion(roles);
     inquirer.prompt(question)
     .then(function(res){
-        var first = "'"+res.first_name+"'";
-        var last = "'"+res.last_name+"'";
+        var first = "'"+res.first_name.trim()+"'";
+        var last = "'"+res.last_name.trim()+"'";
         var roleId = 0;
         var managerId = 0;
         switch(res.role){
@@ -196,6 +195,8 @@ var delEmployee = function(){
                 console.table(res);
                 startDisplay();
             })
+        }else{
+            startDisplay();
         }
     })
 }
