@@ -1,5 +1,5 @@
 class ViewAll{ 
-    constructor(data, column, option){
+    constructor(data, column, option, option2){
         this.data = data;
         this.column = column;
         this.option = option;
@@ -23,6 +23,10 @@ class ViewAll{
     deleteEmployee(){
         var query = "DELETE FROM employee WHERE employee.first_name =" + this.data+ " AND employee.last_name=" + this.column;
         return query;
+    }
+    updateData(){
+        var query = "UPDATE "+ this.data +" SET "+this.column+" WHERE employee.first_name="+this.option+" AND employee.last_name="+ this.option2;
+        return query; 
     }
 }
 
