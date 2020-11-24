@@ -4,6 +4,7 @@ const inquirer = require("inquirer");
 const app = express();
 const PORT = process.env.PORT || 8080;
 const ViewAll = require("./queries.js");
+const promptQ = require("./prompts.js");
 var viewAll = new ViewAll(["employee.first_name, employee.last_name, role.title, department_list.department, role.salary, employee.manager_id"]
 , ["department_list, role, employee"], ["role.id = employee.role_id AND department_list.id = role.department_id"]).viewAll();
 
@@ -46,6 +47,7 @@ function startDisplay(){
                 employeeByDepartment();
             break;
             case("View All Employees By Manager"):
+                employeeByManager();
 
             break;
             case("Add Employee"):
@@ -79,14 +81,24 @@ function startDisplay(){
     })
 }
 var employeeByDepartment = function(){
-    var question = [
-        {
-            name: 'department',
-            type: 'list',
-            message: 'Which department would you like to see employees for? ',
-            choices: depart,
-        }
-    ]
+    var viewEmpByDepQuestion = new promptQ;
+    var question = viewEmpByDepQuestion.viewByDepQuestion(depart);
+    inquirer.prompt(question)
+    .then(function(res){
+        var department = "'" + res.department +"'";
+        var byDepartment = new ViewAll(["employee.first_name, employee.last_name, role.title"]
+        , ["department_list, role, employee"], 
+        ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).viewAll();
+        connection.query(byDepartment, function(err, res){
+            if(err) throw err;
+            console.table(res);
+            startDisplay();
+        })
+    })
+}
+var employeeByManager = function(){
+    var viewEmpByManager = new promptQ;
+    var question = viewEmpByManager.viewByManagerQuestion(manager);
     inquirer.prompt(question)
     .then(function(res){
         var department = "'" + res.department +"'";
@@ -101,29 +113,8 @@ var employeeByDepartment = function(){
     })
 }
 var addEmployee = function(){
-    var question = [
-        {
-            name: "first_name",
-            type: "input",
-            message:"What is the employee's first name?",
-        },
-        {
-            name: "last_name",
-            type: "input",
-            message: "What is the employees' last name?"
-        },
-        {
-            name: "role",
-            type: "list",
-            message: "What it the employee's role?",
-            choices: roles
-        },
-        {
-            name: "manager",
-            type: "input",
-            message: "Who is the employee's manager?"
-        }
-    ];
+    var addEmployeeQ = new promptQ;
+    var question = addEmployeeQ.addEmpQuestion(roles);
     inquirer.prompt(question)
     .then(function(res){
         var first = "'"+res.first_name+"'";
