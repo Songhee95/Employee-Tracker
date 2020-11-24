@@ -18,6 +18,7 @@ var connection = mysql.createConnection({
   });
 var roles=[];
 var depart = [];
+var manager = [];
 
 connection.connect(function(err){
     if(err) throw err;
@@ -27,6 +28,10 @@ connection.connect(function(err){
             roles.push(role.title);
             if(depart.indexOf(role.department) == -1){
                 depart.push(role.department);
+            }
+            if(manager.indexOf(role.manager_name) == -1 && role.manager_name != null){
+                var str = role.manager_name;
+                manager.push(str);
             }
         })
         startDisplay();
@@ -101,17 +106,18 @@ var employeeByManager = function(){
     var viewEmpByManager = new promptQ;
     var question = viewEmpByManager.viewByManagerQuestion(manager);
     inquirer.prompt(question)
-    // .then(function(res){
-    //     var department = "'" + res.department +"'";
-    //     var byDepartment = new ViewAll(["employee.first_name, employee.last_name, role.title"]
-    //     , ["department_list, role, employee"], 
-    //     ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).viewAll();
-    //     connection.query(byDepartment, function(err, res){
-    //         if(err) throw err;
-    //         console.table(res);
-    //         startDisplay();
-    //     })
-    // })
+    .then(function(res){
+        var manager = "'" + res.manager +"'";
+        var byManager= new ViewAll(["employee.first_name, employee.last_name, role.title, manager.manager_name"]
+        , ["role, employee, manager"], 
+        ["role.id = employee.role_id AND employee.manager_id = manager.manager_id AND manager.manager_name="+manager]).selectedView();
+        console.log(byManager);
+        connection.query(byManager, function(err, res){
+            if(err) throw err;
+            console.table(res);
+            startDisplay();
+        })
+    })
 }
 var addEmployee = function(){
     var addEmployeeQ = new promptQ;

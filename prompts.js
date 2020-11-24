@@ -42,7 +42,7 @@ class promptQ {
                 name: 'manager',
                 type: 'list',
                 message: 'Which department would you like to see employees for? ',
-                choices: depart,
+                choices: manager
             }
         ]
         return question;
