@@ -5,9 +5,15 @@ class ViewAll{
         this.option = option;
     };
     viewAll(){
-        var query = "SELECT " + this.data + " FROM " 
-        +  this.column +" WHERE " + this.option
-        console.log(query)
+        var query = "SELECT employee.id, employee.first_name, employee.last_name, role.title, department_list.department, role.salary, manager.manager_name ";
+        query += "FROM employee ";
+        query += "LEFT JOIN manager ON employee.manager_id = manager.id ";
+        query += "LEFT JOIN role ON role.id = employee.role_id ";
+        query += "LEFT JOIN department_list ON department_list.id = role.department_id";
+        return query;
+    }
+    selectedView(){
+        var query = "SELECT " + this.data + " FROM " + this.column + " WHERE " + this.option;
         return query;
     }
     insertEmployee(){

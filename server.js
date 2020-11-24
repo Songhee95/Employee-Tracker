@@ -5,8 +5,9 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const ViewAll = require("./queries.js");
 const promptQ = require("./prompts.js");
-var viewAll = new ViewAll(["employee.first_name, employee.last_name, role.title, department_list.department, role.salary, employee.manager_id"]
-, ["department_list, role, employee"], ["role.id = employee.role_id AND department_list.id = role.department_id"]).viewAll();
+
+var view = new ViewAll;
+var viewAll = view.viewAll(); 
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -86,9 +87,9 @@ var employeeByDepartment = function(){
     inquirer.prompt(question)
     .then(function(res){
         var department = "'" + res.department +"'";
-        var byDepartment = new ViewAll(["employee.first_name, employee.last_name, role.title"]
+        var byDepartment = new ViewAll(["employee.id , employee.first_name, employee.last_name, role.title"]
         , ["department_list, role, employee"], 
-        ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).viewAll();
+        ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).selectedView();
         connection.query(byDepartment, function(err, res){
             if(err) throw err;
             console.table(res);
@@ -100,17 +101,17 @@ var employeeByManager = function(){
     var viewEmpByManager = new promptQ;
     var question = viewEmpByManager.viewByManagerQuestion(manager);
     inquirer.prompt(question)
-    .then(function(res){
-        var department = "'" + res.department +"'";
-        var byDepartment = new ViewAll(["employee.first_name, employee.last_name, role.title"]
-        , ["department_list, role, employee"], 
-        ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).viewAll();
-        connection.query(byDepartment, function(err, res){
-            if(err) throw err;
-            console.table(res);
-            startDisplay();
-        })
-    })
+    // .then(function(res){
+    //     var department = "'" + res.department +"'";
+    //     var byDepartment = new ViewAll(["employee.first_name, employee.last_name, role.title"]
+    //     , ["department_list, role, employee"], 
+    //     ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).viewAll();
+    //     connection.query(byDepartment, function(err, res){
+    //         if(err) throw err;
+    //         console.table(res);
+    //         startDisplay();
+    //     })
+    // })
 }
 var addEmployee = function(){
     var addEmployeeQ = new promptQ;
