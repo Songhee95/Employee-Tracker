@@ -16,29 +16,38 @@ var connection = mysql.createConnection({
     password: "dmwm9191@A",
     database: "employee_data"
   });
-var roles=[];
-var depart = [];
-var manager = [];
+  let roles=[];
+  let depart = [];
+  let manager = [];
+  let employee = [];
 
 connection.connect(function(err){
     if(err) throw err;
+        startDisplay();
+});
+function getData(){
+    roles = [];
+    depart = [];
+    manager = [];
+    employee = [];
     connection.query(viewAll, function(err,res){
         if(err) throw err;
-        res.map(role => {
-            roles.push(role.title);
-            if(depart.indexOf(role.department) == -1){
-                depart.push(role.department);
+        res.map(data => {
+            roles.push(data.title);
+            var employeeName = data.first_name +" "+data.last_name;
+            employee.push(employeeName);
+            if(depart.indexOf(data.department) == -1){
+                depart.push(data.department);
             }
-            if(manager.indexOf(role.manager_name) == -1 && role.manager_name != null){
-                var str = role.manager_name;
+            if(manager.indexOf(data.manager_name) == -1 && data.manager_name != null){
+                var str = data.manager_name;
                 manager.push(str);
             }
         })
-        startDisplay();
-    })
-});
-function startDisplay(){
-    inquirer
+})};
+async function startDisplay(){
+    getData();
+    await inquirer
     .prompt(start)
     .then(res => {
         let answer = res.start;
@@ -60,7 +69,7 @@ function startDisplay(){
                 addEmployee();
             break;
             case("Remove Employee"):
-
+                delEmployee();
             break;
             case("Update Employee Role"):
 
@@ -121,6 +130,7 @@ var employeeByManager = function(){
 }
 var addEmployee = function(){
     var addEmployeeQ = new promptQ;
+    console.log(roles)
     var question = addEmployeeQ.addEmpQuestion(roles);
     inquirer.prompt(question)
     .then(function(res){
@@ -133,7 +143,7 @@ var addEmployee = function(){
                 roleId =1;
                 managerId = 1;
             break;
-            case("SalesPerson"):
+            case("Salesperson"):
                 roleId = 2;
                 managerId = 1;
             break;
@@ -168,6 +178,25 @@ var addEmployee = function(){
             console.table(res);
             startDisplay();
         })
+    })
+}
+var delEmployee = function(){
+    var delQ = new promptQ;
+    var delEmployeeQ = delQ.delEmployeeQuestion(employee);
+    inquirer.prompt(delEmployeeQ)
+    .then(res =>{
+        var splitName = res.employee.split(" ");
+        var delView = new ViewAll("'"+splitName[0]+"'","'"+splitName[1]+"'");
+        console.log(delView);
+        var delEmployee = delView.deleteEmployee();
+        console.log(res.confirm);
+        if(res.confirm){
+            connection.query(delEmployee, function(err, res){
+                if(err) throw err;
+                console.table(res);
+                startDisplay();
+            })
+        }
     })
 }
 app.listen(PORT, function(){

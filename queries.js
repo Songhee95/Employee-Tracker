@@ -18,8 +18,11 @@ class ViewAll{
     }
     insertEmployee(){
         var query = "INSERT INTO employee (" + this.data +") VALUES (" + this.column +")";
-        console.log(query);
         return query; 
+    }
+    deleteEmployee(){
+        var query = "DELETE FROM employee WHERE employee.first_name =" + this.data+ " AND employee.last_name=" + this.column;
+        return query;
     }
 }
 

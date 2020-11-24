@@ -42,6 +42,22 @@ class promptQ {
         ]
         return question;
     }
+    delEmployeeQuestion = function(employee){
+        var question = [
+            {
+                name: "employee",
+                type: "list",
+                message: "Which employee data would you like to delete? ",
+                choices: employee
+            },
+            {
+                name: "confirm",
+                type: "confirm",
+                message:"Are you sure to delete this employee data?",
+            }
+        ]
+        return question;
+    }
 }
 
 module.exports = promptQ;
