@@ -127,35 +127,42 @@ var addEmployee = function(){
         var first = "'"+res.first_name+"'";
         var last = "'"+res.last_name+"'";
         var roleId = 0;
+        var managerId = 0;
         switch(res.role){
             case ("Sales Lead"):
                 roleId =1;
+                managerId = 1;
             break;
             case("SalesPerson"):
                 roleId = 2;
+                managerId = 1;
             break;
             case("Lead Engineer"):
                 roleId = 3;
+                managerId =2;
             break;
-            case("Software Engneer"):
+            case("Software Engineer"):
                 roleId = 4;
+                managerId =2;
             break;
             case("Account Manager"):
                 roleId = 5;
+                managerId =3;
             break;
             case("Accountant"):
                 roleId = 6;
+                managerId =3;
             break;
             case("Legal Team Lead"):
                 roleId = 7;
+                managerId =4;
             break;
             case("Lawyer"):
                 roleId = 8;
+                managerId =4;
             break;
         }
-        console.log(roleId);
-        var manager = res.manager;
-        var insEmployee = new ViewAll(["first_name, last_name, role_id, manager_id"], [first, last, roleId, manager]).insertEmployee();
+        var insEmployee = new ViewAll(["first_name, last_name, role_id, manager_id"], [first, last, roleId, managerId]).insertEmployee();
         connection.query(insEmployee, function(err, res){
             if (err) throw err;
             console.table(res);

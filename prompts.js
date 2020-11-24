@@ -16,11 +16,6 @@ class promptQ {
                 type: "list",
                 message: "What it the employee's role?",
                 choices: roles
-            },
-            {
-                name: "manager",
-                type: "input",
-                message: "Who is the employee's manager?"
             }
         ]   
         return question;
