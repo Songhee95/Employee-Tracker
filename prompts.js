@@ -1,7 +1,7 @@
 const Prompt = require("inquirer/lib/prompts/base");
 
 class promptQ {
-    addEmpQuestion =function(roles) {
+    addEmpQuestion =function(roles, manager) {
         var question = [
             {
                 name: "first_name",
@@ -18,6 +18,12 @@ class promptQ {
                 type: "list",
                 message: "What it the employee's role?",
                 choices: roles
+            },
+            {
+                name:"manager",
+                type:"list",
+                message: "Who is your manager?",
+                choices: manager
             }
         ]   
         return question;
@@ -73,10 +79,8 @@ class promptQ {
                 type: "list",
                 message: "Which part of data would you like to update?",
                 choices: [
-                    "title",
-                    "department",
-                    "salary",
-                    "manager_name"
+                    "role",
+                    "manager"
                 ]
             }
         ]
@@ -88,28 +92,18 @@ class promptQ {
                 name: "title",
                 type: "list",
                 message: "Select a role you want to change: ",
-                choice: roles
-            },
-            {
-                name: "confirm",
-                type:'confirm',
-                message: "Do you want to change the employee role? "
+                choices: roles
             }
         ]
         return question;
     }
-    displayDepartment = function(depart){
+    displayManager = function(manager){
         var question = [
             {
-                name: "department",
+                name: 'managerName',
                 type: "list",
-                message: "Select a department you want to change: ",
-                choice: depart
-            },
-            {
-                name: "confirm",
-                type: "confirm",
-                message: "Do you want to change the employee role? "
+                message: "Select a Manager name you want to change: ",
+                choices : manager
             }
         ]
         return question;

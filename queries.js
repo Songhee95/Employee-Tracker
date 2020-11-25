@@ -1,5 +1,5 @@
 class ViewAll{ 
-    constructor(data, column, option, option2){
+    constructor(data, column, option){
         this.data = data;
         this.column = column;
         this.option = option;
@@ -25,7 +25,7 @@ class ViewAll{
         return query;
     }
     updateData(){
-        var query = "UPDATE "+ this.data +" SET "+this.column+" WHERE employee.first_name="+this.option+" AND employee.last_name="+ this.option2;
+        var query = "UPDATE employee SET "+this.data+" WHERE employee.first_name="+this.column+" AND employee.last_name="+ this.option;
         return query; 
     }
 }

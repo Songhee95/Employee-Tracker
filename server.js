@@ -5,7 +5,6 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const ViewAll = require("./queries.js");
 const promptQ = require("./prompts.js");
-const Department = require("./department.js");
 
 var view = new ViewAll;
 var viewAll = view.viewAll(); 
@@ -46,6 +45,20 @@ function getData(){
             }
         })
 })};
+function managerAndID(data){
+    for(var i=0; i< roles.length; i++){
+        if(data == manager[i]){
+            return i+1;
+        }
+    }
+}
+function roleInDepartment(data){
+    for(var i=0; i<roles.length; i++){
+        if(data === roles[i]){
+            return i+1;
+        }
+    }
+}
 function startDisplay(){
     getData();
     inquirer
@@ -72,11 +85,11 @@ function startDisplay(){
             case("Remove Employee"):
                 delEmployee();
             break;
-            case("Update Employee Role"):
+            case("Update Employee Role or Manager"):
                 updateEmployee();
             break;
             case("View All Roles"):
-
+                displayRoles();
             break;
             case("Add Role"):
 
@@ -128,15 +141,16 @@ var employeeByManager = function(){
 }
 var addEmployee = function(){
     var addEmployeeQ = new promptQ;
-    var question = addEmployeeQ.addEmpQuestion(roles);
+    var question = addEmployeeQ.addEmpQuestion(roles, manager);
     inquirer.prompt(question)
     .then(function(res){
-        var role = res.role
+        var role = res.role;
+        var manager = res.manager;
         var first = "'"+res.first_name.trim()+"'";
         var last = "'"+res.last_name.trim()+"'";
-        var department = new Department(role, 0, 0);
-        var result = department.roleInDepartment();
-        var insEmployee = new ViewAll(["first_name, last_name, role_id, manager_id"], [first, last, result[0], result[1]]).insertEmployee();
+        var department = roleInDepartment(role);
+        var manager = managerAndID(manager);
+        var insEmployee = new ViewAll(["first_name, last_name, role_id, manager_id"], [first, last, department, manager]).insertEmployee();
         connection.query(insEmployee, function(err, res){
             if (err) throw err;
             console.table(res);
@@ -151,9 +165,7 @@ var delEmployee = function(){
     .then(res =>{
         var splitName = res.employee.split(" ");
         var delView = new ViewAll("'"+splitName[0]+"'","'"+splitName[1]+"'");
-        console.log(delView);
         var delEmployee = delView.deleteEmployee();
-        console.log(res.confirm);
         if(res.confirm){
             connection.query(delEmployee, function(err, res){
                 if(err) throw err;
@@ -168,23 +180,37 @@ var delEmployee = function(){
 var updateEmployee = function(){
     var updateQ = new promptQ;
     var updateEmployeeQ = updateQ.updateEmployeeQuestion(employee);
+    var updateTitleQ = updateQ.displayTitle(roles);
+    var updateManagerQ = updateQ.displayManager(manager);
     inquirer.prompt(updateEmployeeQ)
     .then(res =>{
         var name = res.employee.split(" ");
         var first = '"'+name[0]+'"';
         var last = '"'+name[1]+'"';
-        var updateData = '"'+res.updateSection+"= '"+res.update+"'"+'"';
-        switch(res.dataSection){
-            case "title":
-                var updateView = new viewAll("role", updateData,first,last);
+        if(res.updateSection ==="role"){
+            inquirer.prompt(updateTitleQ)
+            .then(res => {
+                var result = roleInDepartment(res.title);
+                var updateView = new ViewAll("role_id="+result ,first,last);
                 var UpdateView = updateView.updateData();
                 connection.query(UpdateView, function(err, res){
                     if(err) throw err;
-                    console.table(res)
+                    console.table(res);
+                    startDisplay();
                 })
-            break;
-            case 'department':
-
+            })
+        }else{
+            inquirer.prompt(updateManagerQ)
+            .then(res =>{
+                var managerId = managerAndID(res.managerName);
+                var updateView = new ViewAll("manager_id="+managerId, first,last);
+                var UpdateView = updateView.updateData();
+                connection.query(UpdateView, function(err, res){
+                    if(err) throw err;
+                    console.table(res);
+                    startDisplay();
+                })
+            })
         }
     })
 }
@@ -202,8 +228,7 @@ var start = {
         "View All Employees By Manager",
         "Add Employee",
         "Remove Employee",
-        "Update Employee Role",
-        "Update Employee Manager",
+        "Update Employee Role or Manager",
         "View All Roles",
         "Add Role",
         "Remove Role",
