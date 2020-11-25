@@ -10,6 +10,7 @@ var view = new Queries;
 var viewAll = view.viewAll(); 
 var viewDepartment = view.tableDepartment();
 var viewRole = view.tableRole();
+var viewManager = view.tableManager();
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -24,6 +25,7 @@ var connection = mysql.createConnection({
   let employee = [];
   let departId =[];
   let roleAndId = [];
+  let managerAndId = [];
 
 connection.connect(function(err){
     if(err) throw err;
@@ -36,6 +38,8 @@ function getData(){
     manager = [];
     employee = [];
     departId =[];
+    roleAndId = [];
+    managerAndId =[];
     connection.query(viewDepartment, function(err, res){
         if(err) throw err;
         res.map(data =>{
@@ -60,28 +64,36 @@ function getData(){
             roles.push(roleTitle);
         })
     })
+    connection.query(viewManager, function(err, res){
+        if(err) throw err;
+        res.map(data =>{
+            var managerId = data.manager_id;
+            var managerName = data.manager_name;
+            var obj = {};
+            obj.name = managerName;
+            obj.id = managerId;
+            managerAndId.push(obj);
+            manager.push(managerName);
+        })
+    })
     connection.query(viewAll, function(err,res){
         if(err) throw err;
         res.map(data => {
             var employeeName = data.first_name +" "+data.last_name;
             employee.push(employeeName);
-            if(manager.indexOf(data.manager_name) == -1 && data.manager_name != null){
-                var str = data.manager_name;
-                manager.push(str);
-            }
         })
 })};
 function managerAndID(data){
-    for(var i=0; i< roles.length; i++){
-        if(data == manager[i]){
-            return i+1;
+    for(var i=0; i< managerAndId.length; i++){
+        if(data == managerAndId[i].name){
+            return managerAndId[i].id;
         }
     }
 }
 function roleInDepartment(data){
-    for(var i=0; i<roles.length; i++){
-        if(data === roles[i]){
-            return i+1;
+    for(var i=0; i<roleAndId.length; i++){
+        if(data === roleAndId[i].title){
+            return roleAndId[i].roleId;
         }
     }
 }

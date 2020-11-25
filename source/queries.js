@@ -4,6 +4,10 @@ class Queries{
         this.column = column;
         this.option = option;
     };
+    tableManager(){
+        var query = "SELECT * FROM manager";
+        return query;
+    }
     tableDepartment(){
         var query = "SELECT * FROM department_list";
         return query;
