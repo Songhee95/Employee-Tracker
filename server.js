@@ -136,10 +136,11 @@ function startDisplay(){
                 removeRole();
             break;
             case("View All Departments"):
-
+                console.table(depart);
+                startDisplay();
             break;
             case("Add Department"):
-
+                addDepartment();
             break;
         }
     })
@@ -277,7 +278,7 @@ function removeRole(){
     var delRoleQ = delRoleQuestion.delRole(roles);
     inquirer.prompt(delRoleQ)
     .then(res =>{
-        var name = res.department;
+        var name = res.role;
         var delRoleQuery = new Queries(name);
         var query = delRoleQuery.removeRole();
         connection.query(query, function(err, res){
@@ -286,6 +287,10 @@ function removeRole(){
             startDisplay();
         })
     })
+
+}
+function addDepartment(){
+    var addDepartQuestion = new promptQ;
 
 }
 app.listen(PORT, function(){

@@ -127,17 +127,18 @@ class promptQ {
         ]
         return question;
     }
-    delRole = function(depart){
+    delRole = function(roles){
         var question =[
             {
-                name: "department",
+                name: "role",
                 type:"list",
-                message: "Which department would you like to delete?",
-                choices: depart
+                message: "Which Role would you like to delete?",
+                choices: roles
             }
         ]
         return question;
     }
+
 }
 
 module.exports = promptQ;
