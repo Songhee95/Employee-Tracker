@@ -124,7 +124,6 @@ function startDisplay(){
         switch(answer){
             case("View All Employees"):
                 connection.query(viewAll, function(err,res){
-                    console.log(roleAndId);
                     console.table(res);
                     startDisplay();
                 })
@@ -190,7 +189,6 @@ var employeeByManager = function(){
         var byManager= new Queries(["employee.first_name, employee.last_name, role.title, manager.manager_name"]
         , ["role, employee, manager"], 
         ["role.id = employee.role_id AND employee.manager_id = manager.manager_id AND manager.manager_name="+manager]).selectedView();
-        console.log(byManager);
         connection.query(byManager, function(err, res){
             if(err) throw err;
             console.table(res);
