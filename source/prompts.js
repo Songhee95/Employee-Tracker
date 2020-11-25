@@ -1,5 +1,3 @@
-const Prompt = require("inquirer/lib/prompts/base");
-
 class promptQ {
     addEmpQuestion =function(roles, manager) {
         var question = [
@@ -104,6 +102,27 @@ class promptQ {
                 type: "list",
                 message: "Select a Manager name you want to change: ",
                 choices : manager
+            }
+        ]
+        return question;
+    }
+    addRole = function(department){
+        var question = [
+            {
+                name: 'title',
+                type: "input",
+                message: "Create new employee role: "
+            },
+            {
+                name:'salary',
+                type: "input",
+                message:"Input salary for this role: "
+            },
+            {
+                name:"department",
+                type: "list",
+                message:"Select department where this role belongs to: ",
+                choices: department
             }
         ]
         return question;

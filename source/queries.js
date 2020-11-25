@@ -1,9 +1,17 @@
-class ViewAll{ 
+class Queries{ 
     constructor(data, column, option){
         this.data = data;
         this.column = column;
         this.option = option;
     };
+    tableDepartment(){
+        var query = "SELECT * FROM department_list";
+        return query;
+    }
+    tableRole(){
+        var query = "SELECT * FROM role";
+        return query;
+    }
     viewAll(){
         var query = "SELECT employee.id, employee.first_name, employee.last_name, role.title, department_list.department, role.salary, manager.manager_name ";
         query += "FROM employee ";
@@ -28,6 +36,10 @@ class ViewAll{
         var query = "UPDATE employee SET "+this.data+" WHERE employee.first_name="+this.column+" AND employee.last_name="+ this.option;
         return query; 
     }
+    addRole(){
+        var query = "INSERT INTO role(title, salary, department_id) VALUES ('"+this.data+"',"+this.column+","+this.option+")";
+        return query;
+    }
 }
 
-module.exports =ViewAll;
+module.exports =Queries;
