@@ -133,7 +133,7 @@ function startDisplay(){
                 addRoles();
             break;
             case("Remove Role"):
-
+                removeRole();
             break;
             case("View All Departments"):
 
@@ -271,6 +271,22 @@ function addRoles(){
             startDisplay();
         })
     })
+}
+function removeRole(){
+    var delRoleQuestion = new promptQ;
+    var delRoleQ = delRoleQuestion.delRole(roles);
+    inquirer.prompt(delRoleQ)
+    .then(res =>{
+        var name = res.department;
+        var delRoleQuery = new Queries(name);
+        var query = delRoleQuery.removeRole();
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            console.table(res);
+            startDisplay();
+        })
+    })
+
 }
 app.listen(PORT, function(){
     console.log("app is listening on port :" + PORT);

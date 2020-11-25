@@ -40,6 +40,10 @@ class Queries{
         var query = "INSERT INTO role(title, salary, department_id) VALUES ('"+this.data+"',"+this.column+","+this.option+")";
         return query;
     }
+    removeRole(){
+        var query = "DELETE FROM role WHERE title='"+this.data+"'";
+        return query;
+    }
 }
 
 module.exports =Queries;
