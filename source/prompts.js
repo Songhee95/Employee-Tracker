@@ -138,7 +138,16 @@ class promptQ {
         ]
         return question;
     }
-
+    addNewDepartment = function(){
+        var question = [
+            {
+                name: 'newDep',
+                type: 'input',
+                message: "Enter New department :"
+            }
+        ]
+        return question;
+    }
 }
 
 module.exports = promptQ;

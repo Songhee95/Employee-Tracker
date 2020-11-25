@@ -23,6 +23,7 @@ var connection = mysql.createConnection({
   let manager = [];
   let employee = [];
   let departId =[];
+  let roleAndId = [];
 
 connection.connect(function(err){
     if(err) throw err;
@@ -50,7 +51,13 @@ function getData(){
     connection.query(viewRole, function(err, res){
         if(err) throw err;
         res.map(data =>{
-            roles.push(data.title)
+            var roleTitle = data.title;
+            var roleId = data.id;
+            var obj ={};
+            obj.title = roleTitle;
+            obj.roleId = roleId;
+            roleAndId.push(obj);
+            roles.push(roleTitle);
         })
     })
     connection.query(viewAll, function(err,res){
@@ -105,6 +112,7 @@ function startDisplay(){
         switch(answer){
             case("View All Employees"):
                 connection.query(viewAll, function(err,res){
+                    console.log(roleAndId);
                     console.table(res);
                     startDisplay();
                 })
@@ -291,6 +299,17 @@ function removeRole(){
 }
 function addDepartment(){
     var addDepartQuestion = new promptQ;
+    var addDepartmentQ = addDepartQuestion.addNewDepartment();
+    inquirer.prompt(addDepartmentQ)
+    .then(res =>{
+        var addDepartQuery = new Queries(res.newDep);
+        var addDepartQ = addDepartQuery.addDepart();
+        connection.query(addDepartQ, function(err, res){
+            if(err) throw err;
+            console.table(res);
+            startDisplay();
+        })
+    })
 
 }
 app.listen(PORT, function(){

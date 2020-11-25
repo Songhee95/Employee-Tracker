@@ -44,6 +44,10 @@ class Queries{
         var query = "DELETE FROM role WHERE title='"+this.data+"'";
         return query;
     }
+    addDepart(){
+        var query = "INSERT INTO department_list (department) VALUES ('" + this.data+"')"
+        return query;
+    }
 }
 
 module.exports =Queries;
