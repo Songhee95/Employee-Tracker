@@ -1,5 +1,32 @@
-class promptQ {
-    addEmpQuestion =function(roles, manager) {
+const inquirer = require("inquirer");
+
+var orm= {
+    startPrompt : function(cb){
+        var question =[
+            {
+                name: "start",
+                type: "list",
+                message: "What would you like to do?",
+                choices: [
+                    "View All Employees",
+                    "View All Employees By Department",
+                    "View All Employees By Manager",
+                    "Add Employee",
+                    "Remove Employee",
+                    "Update Employee Role or Manager",
+                    "View All Roles",
+                    "Add Role",
+                    "Remove Role",
+                    "View All Departments",
+                    "Add Department"
+                ]
+            }
+        ]
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
+    },
+    addEmpQuestion :function(roles, manager, cb) {
         var question = [
             {
                 name: "first_name",
@@ -24,9 +51,11 @@ class promptQ {
                 choices: manager
             }
         ]   
-        return question;
-    }
-    viewByDepQuestion = function(depart){
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
+    },
+    viewByDepQuestion : function(depart, cb){
         var question = [
             {
                 name: 'department',
@@ -35,20 +64,23 @@ class promptQ {
                 choices: depart,
             }
         ]
-        return question;
-    }
-    viewByManagerQuestion = function(manager){
-        var question = [
-            {
-                name: 'manager',
-                type: 'list',
-                message: 'Which department would you like to see employees for? ',
-                choices: manager
-            }
-        ]
-        return question;
-    }
-    delEmployeeQuestion = function(employee){
+        inquirer.prompt(question)
+        .then(res => cb(res));
+    },
+    viewByManagerQuestion : function(manager,cb){
+        return new Promise((resolve, reject) =>{
+            var question = [
+                {
+                    name: 'manager',
+                    type: 'list',
+                    message: 'Which department would you like to see employees for? ',
+                    choices: manager
+                }
+            ]
+            inquirer.prompt(question).then(res =>cb(res))
+        })
+    },
+    delEmployeeQuestion : function(employee, cb){
         var question = [
             {
                 name: "employee",
@@ -61,10 +93,12 @@ class promptQ {
                 type: "confirm",
                 message:"Are you sure to delete this employee data?",
             }
-        ]
-        return question;
-    }
-    updateEmployeeQuestion = function(employee){
+        ];
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
+    },
+    updateEmployeeQuestion : function(employee, cb){
         var question = [
             {
                 name: "employee",
@@ -82,9 +116,11 @@ class promptQ {
                 ]
             }
         ]
-        return question;
-    }
-    displayTitle = function(roles){
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
+    },
+    displayTitle : function(roles, cb){
         var question = [
             {
                 name: "title",
@@ -93,9 +129,11 @@ class promptQ {
                 choices: roles
             }
         ]
-        return question;
-    }
-    displayManager = function(manager){
+        inquirer.prompt(question).then(res=>{
+            cb(res);
+        })
+    },
+    displayManager : function(manager, cb){
         var question = [
             {
                 name: 'managerName',
@@ -104,9 +142,11 @@ class promptQ {
                 choices : manager
             }
         ]
-        return question;
-    }
-    addRole = function(department){
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
+    },
+    addRole : function(department, cb){
         var question = [
             {
                 name: 'title',
@@ -125,9 +165,11 @@ class promptQ {
                 choices: department
             }
         ]
-        return question;
-    }
-    delRole = function(roles){
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
+    },
+    delRole : function(roles, cb){
         var question =[
             {
                 name: "role",
@@ -136,9 +178,11 @@ class promptQ {
                 choices: roles
             }
         ]
-        return question;
-    }
-    addNewDepartment = function(){
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
+    },
+    addNewDepartment : function(cb){
         var question = [
             {
                 name: 'newDep',
@@ -146,8 +190,10 @@ class promptQ {
                 message: "Enter New department :"
             }
         ]
-        return question;
+        inquirer.prompt(question).then(res =>{
+            cb(res);
+        })
     }
 }
 
-module.exports = promptQ;
+module.exports = orm ;

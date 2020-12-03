@@ -1,56 +1,86 @@
-class Queries{ 
-    constructor(data, column, option){
-        this.data = data;
-        this.column = column;
-        this.option = option;
-    };
-    tableManager(){
+var connection = require("./connection.js");
+
+var Queries = { 
+    tableManager: function(cb){
         var query = "SELECT * FROM manager";
-        return query;
-    }
-    tableDepartment(){
+        connection.query(query, function (err, res){
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    tableDepartment: function(cb){
         var query = "SELECT * FROM department_list";
-        return query;
-    }
-    tableRole(){
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    tableRole: function(cb){
         var query = "SELECT * FROM role";
-        return query;
-    }
-    viewAll(){
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    viewAll: function(cb){
         var query = "SELECT employee.id, employee.first_name, employee.last_name, role.title, department_list.department, role.salary, manager.manager_name ";
         query += "FROM employee ";
         query += "LEFT JOIN manager ON employee.manager_id = manager.manager_id ";
         query += "LEFT JOIN role ON role.id = employee.role_id ";
         query += "LEFT JOIN department_list ON department_list.id = role.department_id";
-        return query;
-    }
-    selectedView(){
-        var query = "SELECT " + this.data + " FROM " + this.column + " WHERE " + this.option;
-        return query;
-    }
-    insertEmployee(){
-        var query = "INSERT INTO employee (" + this.data +") VALUES (" + this.column +")";
-        return query; 
-    }
-    deleteEmployee(){
-        var query = "DELETE FROM employee WHERE employee.first_name =" + this.data+ " AND employee.last_name=" + this.column;
-        return query;
-    }
-    updateData(){
-        var query = "UPDATE employee SET "+this.data+" WHERE employee.first_name="+this.column+" AND employee.last_name="+ this.option;
-        return query; 
-    }
-    addRole(){
-        var query = "INSERT INTO role(title, salary, department_id) VALUES ('"+this.data+"',"+this.column+","+this.option+")";
-        return query;
-    }
-    removeRole(){
-        var query = "DELETE FROM role WHERE title='"+this.data+"'";
-        return query;
-    }
-    addDepart(){
-        var query = "INSERT INTO department_list (department) VALUES ('" + this.data+"')"
-        return query;
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    selectedView: function(list, table, option, cb){
+        var query = "SELECT " + list + " FROM " + table + " WHERE " + option;
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    insertEmployee: function(insertData, cb){
+        var query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("+insertData+")";
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    deleteEmployee: function(first, last, cb){
+        var query = "DELETE FROM employee WHERE employee.first_name =" + first+ " AND employee.last_name=" + last;
+        connection.query(query, function(err, res){
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    updateData: function(id, first, last, cb){
+        var query = "UPDATE employee SET "+id+" WHERE employee.first_name="+first +" AND employee.last_name="+ last;
+        connection.query(query, (err, res)=>{
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    addRole: function(title, salary, id, cb){
+        var query = "INSERT INTO role(title, salary, department_id) VALUES ('"+title+"',"+salary+","+id+")";
+        connection.query(query, (err, res) =>{
+            if(err) throw err;
+            cb(res);
+        })
+    },
+    removeRole: function(role, cb){
+        var query = "DELETE FROM role WHERE title='"+role+"'";
+        connection.query(query, (err, res) =>{
+            if(err) throw err;
+            cb(res);
+        })
+    }, 
+    addDepart: function(department, cb){
+        var query = "INSERT INTO department_list (department) VALUES ('" + department+"')"
+        connection.query(query,(err, res) =>{
+            if(err) throw err;
+            cb(res);
+        })
     }
 }
 

@@ -1,129 +1,37 @@
 const express = require('express');
-const mysql = require("mysql");
 const inquirer = require("inquirer");
+const connection = require("./source/connection.js");
 const app = express();
 const PORT = process.env.PORT || 8080;
 const Queries = require("./source/queries.js");
-const promptQ = require("./source/prompts.js");
+const orm = require("./source/orm.js");
+const getData = require('./source/getData');
+const { query } = require('express');
 
-var view = new Queries;
-var viewAll = view.viewAll(); 
-var viewDepartment = view.tableDepartment();
-var viewRole = view.tableRole();
-var viewManager = view.tableManager();
+let roles, depart, manager, employee, departAndId ,roleAndId, managerAndId; 
+  
+  startDisplay();
 
-var connection = mysql.createConnection({
-    host: "localhost",
-    port: 3306,
-    user: "root",
-    password: "dmwm9191@A",
-    database: "employee_data"
-  });
-  let roles=[];
-  let depart = [];
-  let manager = [];
-  let employee = [];
-  let departId =[];
-  let roleAndId = [];
-  let managerAndId = [];
-
-connection.connect(function(err){
-    if(err) throw err;
-        startDisplay();
-});
-
-function getData(){
-    roles = [];
-    depart = [];
-    manager = [];
-    employee = [];
-    departId =[];
-    roleAndId = [];
-    managerAndId =[];
-    connection.query(viewDepartment, function(err, res){
-        if(err) throw err;
-        res.map(data =>{
-            var departmentName = data.department;
-            var depId = data.id;
-            depart.push(departmentName);
-            var obj ={};
-            obj.department= departmentName;
-            obj.id = depId;
-            departId.push(obj);
-        })
+  async function startDisplay(){
+    await getData.getDepart(res =>{
+        depart =res.depart;
+        departAndId=res.departAndId;
+    });
+    await getData.getRole(res =>{
+        roles = res.roles;
+        roleAndId = res.roleAndId;
     })
-    connection.query(viewRole, function(err, res){
-        if(err) throw err;
-        res.map(data =>{
-            var roleTitle = data.title;
-            var roleId = data.id;
-            var obj ={};
-            obj.title = roleTitle;
-            obj.roleId = roleId;
-            roleAndId.push(obj);
-            roles.push(roleTitle);
-        })
+    await getData.getManager(res =>{
+        manager = res.manager;
+        managerAndId = res.managerAndId;
     })
-    connection.query(viewManager, function(err, res){
-        if(err) throw err;
-        res.map(data =>{
-            var managerId = data.manager_id;
-            var managerName = data.manager_name;
-            var obj = {};
-            obj.name = managerName;
-            obj.id = managerId;
-            managerAndId.push(obj);
-            manager.push(managerName);
-        })
+    await getData.employee(res =>{
+        employee = res;
     })
-    connection.query(viewAll, function(err,res){
-        if(err) throw err;
-        res.map(data => {
-            var employeeName = data.first_name +" "+data.last_name;
-            employee.push(employeeName);
-        })
-})};
-function managerAndID(data){
-    for(var i=0; i< managerAndId.length; i++){
-        if(data == managerAndId[i].name){
-            return managerAndId[i].id;
-        }
-    }
-}
-function roleInDepartment(data){
-    for(var i=0; i<roleAndId.length; i++){
-        if(data === roleAndId[i].title){
-            return roleAndId[i].roleId;
-        }
-    }
-}
-var start = {
-    name: "start",
-    type: "list",
-    message: "What would you like to do?",
-    choices: [
-        "View All Employees",
-        "View All Employees By Department",
-        "View All Employees By Manager",
-        "Add Employee",
-        "Remove Employee",
-        "Update Employee Role or Manager",
-        "View All Roles",
-        "Add Role",
-        "Remove Role",
-        "View All Departments",
-        "Add Department"
-    ]
-}
-function startDisplay(){
-    getData();
-    inquirer
-    .prompt(start)
-    .then(res => {
-        let answer = res.start;
-        switch(answer){
+    orm.startPrompt(res =>{
+        switch(res.start){
             case("View All Employees"):
-                connection.query(viewAll, function(err,res){
+                Queries.viewAll(res =>{
                     console.table(res);
                     startDisplay();
                 })
@@ -161,166 +69,131 @@ function startDisplay(){
             case("Add Department"):
                 addDepartment();
             break;
+    }})
+};
+
+function managerId(data){
+    for(var i=0; i< managerAndId.length; i++){
+        if(data === managerAndId[i].managerName){
+            return managerAndId[i].id;
         }
-    })
+    }
+}
+function roleId(data){
+    for(var i=0; i<roleAndId.length; i++){
+        if(data === roleAndId[i].title){
+            return roleAndId[i].roleId;
+        }
+    }
+}
+function departId(data){
+    for(var i=0; i<departAndId.length; i++){
+        if(data ===departAndId[i].department){
+            return departAndId[i].id;
+        }
+    }
 }
 var employeeByDepartment = function(){
-    var viewEmpByDepQuestion = new promptQ;
-    var question = viewEmpByDepQuestion.viewByDepQuestion(depart);
-    inquirer.prompt(question)
-    .then(function(res){
-        var department = "'" + res.department +"'";
-        var byDepartment = new Queries(["employee.id , employee.first_name, employee.last_name, role.title"]
-        , ["department_list, role, employee"], 
-        ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department]).selectedView();
-        connection.query(byDepartment, function(err, res){
-            if(err) throw err;
+    orm.viewByDepQuestion(depart, function(res){
+        var department = "'" + res.department + "'";
+        var listen = ["employee.id , employee.first_name, employee.last_name, role.title"];
+        var table = ["department_list, role, employee"];
+        var option = ["role.id = employee.role_id AND department_list.id = role.department_id AND department_list.department="+department];
+        Queries.selectedView(listen, table, option, function(res){
             console.table(res);
             startDisplay();
-        })
+        });
     })
 }
 var employeeByManager = function(){
-    var viewEmpByManager = new promptQ;
-    var question = viewEmpByManager.viewByManagerQuestion(manager);
-    inquirer.prompt(question)
-    .then(function(res){
-        var manager = "'" + res.manager +"'";
-        var byManager= new Queries(["employee.first_name, employee.last_name, role.title, manager.manager_name"]
-        , ["role, employee, manager"], 
-        ["role.id = employee.role_id AND employee.manager_id = manager.manager_id AND manager.manager_name="+manager]).selectedView();
-        connection.query(byManager, function(err, res){
-            if(err) throw err;
+    orm.viewByManagerQuestion(manager, (res)=>{
+        var selectedManager= "'"+ res.manager + "'";
+        const list = ["employee.first_name, employee.last_name, role.title, manager.manager_name"];
+        const table = ["role, employee, manager"];
+        const option = ["role.id = employee.role_id AND employee.manager_id = manager.manager_id AND manager.manager_name="+selectedManager];
+        Queries.selectedView(list, table, option, res=>{
             console.table(res);
             startDisplay();
         })
     })
 }
 var addEmployee = function(){
-    var addEmployeeQ = new promptQ;
-    var question = addEmployeeQ.addEmpQuestion(roles, manager);
-    inquirer.prompt(question)
-    .then(function(res){
-        var role = res.role;
-        var manager = res.manager;
-        var first = "'"+res.first_name.trim()+"'";
-        var last = "'"+res.last_name.trim()+"'";
-        var department = roleInDepartment(role);
-        var manager = managerAndID(manager);
-        var insEmployee = new Queries(["first_name, last_name, role_id, manager_id"], [first, last, department, manager]).insertEmployee();
-        connection.query(insEmployee, function(err, res){
-            if (err) throw err;
+    orm.addEmpQuestion(roles,manager, res=>{
+        var role = roleId(res.role)
+        var manager = managerId(res.manager);
+        var first = "'" + res.first_name.trim() + "'";
+        var last = "'" + res.last_name.trim() +"'";
+        var insertData = [first, last, role, manager];
+        Queries.insertEmployee(insertData, res=>{
             console.table(res);
             startDisplay();
         })
     })
 }
 var delEmployee = function(){
-    var delQ = new promptQ;
-    var delEmployeeQ = delQ.delEmployeeQuestion(employee);
-    inquirer.prompt(delEmployeeQ)
-    .then(res =>{
+    orm.delEmployeeQuestion(employee, res =>{
         var splitName = res.employee.split(" ");
-        var delView = new Queries("'"+splitName[0]+"'","'"+splitName[1]+"'");
-        var delEmployee = delView.deleteEmployee();
         if(res.confirm){
-            connection.query(delEmployee, function(err, res){
-                if(err) throw err;
-                console.table(res);
-                startDisplay();
-            })
+            Queries.deleteEmployee("'"+splitName[0]+"'", "'"+splitName[1]+"'", res =>{
+            console.table(res);
+            startDisplay();
+            });
         }else{
             startDisplay();
         }
     })
 }
 var updateEmployee = function(){
-    var updateQ = new promptQ;
-    var updateEmployeeQ = updateQ.updateEmployeeQuestion(employee);
-    var updateTitleQ = updateQ.displayTitle(roles);
-    var updateManagerQ = updateQ.displayManager(manager);
-    inquirer.prompt(updateEmployeeQ)
-    .then(res =>{
+    orm.updateEmployeeQuestion(employee, res =>{
         var name = res.employee.split(" ");
-        var first = '"'+name[0]+'"';
-        var last = '"'+name[1]+'"';
-        if(res.updateSection ==="role"){
-            inquirer.prompt(updateTitleQ)
-            .then(res => {
-                var result = roleInDepartment(res.title);
-                var updateView = new Queries("role_id="+result ,first,last);
-                var UpdateView = updateView.updateData();
-                connection.query(UpdateView, function(err, res){
-                    if(err) throw err;
+        var first = "'" + name[0] + "'";
+        var last = "'" + name[1] + "'";
+        if(res.updateSection==="role"){
+            orm.displayTitle(roles, res =>{
+                var result = roleId(res.title)
+                console.log(result);
+                Queries.updateData("role_id="+result, first, last, res =>{
                     console.table(res);
                     startDisplay();
                 })
-            })
+            });
         }else{
-            inquirer.prompt(updateManagerQ)
-            .then(res =>{
-                var managerId = managerAndID(res.managerName);
-                var updateView = new Queries("manager_id="+managerId, first,last);
-                var UpdateView = updateView.updateData();
-                connection.query(UpdateView, function(err, res){
-                    if(err) throw err;
+            orm.displayManager(manager, res =>{
+                var result = managerId(res.managerName);
+                console.log(result);
+                Queries.updateData("manager_id="+result, first, last, res =>{
                     console.table(res);
                     startDisplay();
                 })
-            })
+            });
         }
     })
 }
 function addRoles(){
-    var addRoleQuestion = new promptQ;
-    var addRole = addRoleQuestion.addRole(depart);
-    inquirer.prompt(addRole)
-    .then(res=>{
-        var department = 0;
-        for(var i=0; i<departId.length; i++){
-            if(departId[i].department === res.department){
-                var department = departId[i].id;
-            }
-        }
-        var addRoleQuery = new Queries(res.title, res.salary, department);
-        var query = addRoleQuery.addRole(); 
-        connection.query(query, (err, res)=>{
-            if(err) throw err;
+    orm.addRole(depart, res =>{
+        var id = departId(res.department);
+        Queries.addRole(res.title, res.salary, id, res =>{
             console.table(res);
             startDisplay();
         })
     })
 }
 function removeRole(){
-    var delRoleQuestion = new promptQ;
-    var delRoleQ = delRoleQuestion.delRole(roles);
-    inquirer.prompt(delRoleQ)
-    .then(res =>{
-        var name = res.role;
-        var delRoleQuery = new Queries(name);
-        var query = delRoleQuery.removeRole();
-        connection.query(query, function(err, res){
-            if(err) throw err;
+    orm.delRole(roles, res =>{
+        var title = res.role;
+        Queries.removeRole(title, res =>{
             console.table(res);
             startDisplay();
         })
     })
-
 }
 function addDepartment(){
-    var addDepartQuestion = new promptQ;
-    var addDepartmentQ = addDepartQuestion.addNewDepartment();
-    inquirer.prompt(addDepartmentQ)
-    .then(res =>{
-        var addDepartQuery = new Queries(res.newDep);
-        var addDepartQ = addDepartQuery.addDepart();
-        connection.query(addDepartQ, function(err, res){
-            if(err) throw err;
+    orm.addNewDepartment(res =>{
+        Queries.addDepart(res.newDep, res =>{
             console.table(res);
             startDisplay();
         })
     })
-
 }
 app.listen(PORT, function(){
     console.log("app is listening on port :" + PORT);
